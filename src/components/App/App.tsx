@@ -24,6 +24,8 @@ export default function App() {
     placeholderData: keepPreviousData,
   });
 
+  console.log({ data, isLoading, isError });
+
   const handleSearch = (newQuery: string) => {
     setQuery(newQuery);
     setCurrentPage(1);
@@ -36,7 +38,6 @@ export default function App() {
   const handleClose = () => {
     setSelectedMovie(null);
   };
-  if (!data) return null;
 
   return (
     <>

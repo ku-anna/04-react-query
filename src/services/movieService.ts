@@ -10,6 +10,11 @@ if (!API_TOKEN) {
   );
 }
 
+export interface FetchMoviesParams {
+  query: string;
+  page?: number;
+}
+
 export interface TMDBResponse {
   page: number;
   results: Movie[];
@@ -20,37 +25,23 @@ export interface TMDBResponse {
 export async function fetchMovies({
   query,
   page = 1,
-}: {
-  query: string;
-  page?: number;
-}) {
+}: FetchMoviesParams): Promise<TMDBResponse> {
   try {
     const response = await axios.get<TMDBResponse>(`${BASE_URL}/search/movie`, {
-      params: {
-        query,
-        page,
-      },
+      params: { query, page },
       headers: {
         Authorization: `Bearer ${API_TOKEN}`,
+        accept: "application/json",
       },
     });
 
     return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
-      const status = error.response?.status;
-
-      if (status === 401) {
-        console.error("Unauthorized: Check your TMDB API token.");
-      } else if (status === 404) {
-        console.error("Endpoint not found.");
-      } else {
-        console.error("Network or server error:", error.message);
-      }
+      console.error("Axios error:", error.response?.data || error.message);
     } else {
-      console.error("Unexpected error:", error);
+      console.error("Unknown error:", error);
     }
-
     throw new Error("Failed to fetch movies. Please try again later.");
   }
 }
