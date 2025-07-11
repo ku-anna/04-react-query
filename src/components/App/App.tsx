@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Toaster, toast } from "react-hot-toast";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { Movie } from "../../types/movie";
-import { fetchMovies } from "../../services/movieService";
+import { fetchMovies, TMDBResponse } from "../../services/movieService";
 
 import SearchBar from "../SearchBar/SearchBar";
 import MovieGrid from "../MovieGrid/MovieGrid";
@@ -14,20 +14,19 @@ import ReactPaginate from "../ReactPaginate/ReactPaginate";
 
 export default function App() {
   const [query, setQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
-  const [page, setPage] = useState(1);
 
-  const { data, isLoading, isError } = useQuery({
-    queryKey: ["movies", query, page],
-    queryFn: () => fetchMovies({ query, page }),
-    enabled: !!query,
-    staleTime: 1000 * 60,
-    keepPreviousData: true,
+  const { data, isLoading, isError } = useQuery<TMDBResponse>({
+    queryKey: ["movies", query, currentPage],
+    queryFn: () => fetchMovies({ query, page: currentPage }),
+    enabled: query !== "",
+    placeholderData: keepPreviousData,
   });
 
   const handleSearch = (newQuery: string) => {
     setQuery(newQuery);
-    setPage(1); // Скидаємо на першу сторінку
+    setCurrentPage(1);
   };
 
   const handleSelect = (movie: Movie) => {
@@ -37,6 +36,7 @@ export default function App() {
   const handleClose = () => {
     setSelectedMovie(null);
   };
+  if (!data) return null;
 
   return (
     <>
@@ -47,7 +47,7 @@ export default function App() {
       {isLoading && <Loader />}
       {isError && <ErrorMessage />}
 
-      {data && data.results.length > 0 && (
+      {data?.results.length > 0 && (
         <>
           <p style={{ padding: "8px 0" }}>
             Showing results for: <strong>{query}</strong>
@@ -58,14 +58,19 @@ export default function App() {
           {data.total_pages > 1 && (
             <ReactPaginate
               totalPages={data.total_pages}
-              currentPage={page}
-              onPageChange={(selectedPage: number) => setPage(selectedPage)}
+              currentPage={currentPage}
+              onPageChange={(selectedPage: number) =>
+                setCurrentPage(selectedPage)
+              }
             />
           )}
         </>
       )}
 
-      {data && data.results.length === 0 && toast.error("No movies found.")}
+      {data?.results.length === 0 &&
+        !isLoading &&
+        !isError &&
+        toast.error("No movies found.")}
 
       {selectedMovie && (
         <MovieModal movie={selectedMovie} onClose={handleClose} />

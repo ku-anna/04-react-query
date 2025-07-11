@@ -3,22 +3,22 @@ import css from "./ReactPaginate.module.css";
 
 interface PaginationProps {
   totalPages: number;
-  page: number;
-  onChange: (nextPage: number) => void;
+  currentPage: number;
+  onPageChange: (selectedPage: number) => void;
 }
 
 export default function Pagination({
-  page,
   totalPages,
-  onChange,
+  currentPage,
+  onPageChange,
 }: PaginationProps) {
   return (
     <ReactPaginate
       pageCount={totalPages}
       pageRangeDisplayed={5}
       marginPagesDisplayed={1}
-      onPageChange={({ selected }) => onChange(selected + 1)}
-      forcePage={page - 1}
+      onPageChange={({ selected }) => onPageChange(selected + 1)}
+      forcePage={currentPage - 1}
       containerClassName={css.pagination}
       activeClassName={css.active}
       nextLabel="→"

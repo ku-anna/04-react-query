@@ -10,12 +10,7 @@ if (!API_TOKEN) {
   );
 }
 
-interface FetchMoviesParams {
-  query: string;
-  page?: number;
-}
-
-interface TMDBResponse {
+export interface TMDBResponse {
   page: number;
   results: Movie[];
   total_pages: number;
@@ -25,7 +20,10 @@ interface TMDBResponse {
 export async function fetchMovies({
   query,
   page = 1,
-}: FetchMoviesParams): Promise<Movie[]> {
+}: {
+  query: string;
+  page?: number;
+}) {
   try {
     const response = await axios.get<TMDBResponse>(`${BASE_URL}/search/movie`, {
       params: {
@@ -37,7 +35,7 @@ export async function fetchMovies({
       },
     });
 
-    return response.data.results;
+    return response.data;
   } catch (error) {
     if (axios.isAxiosError(error)) {
       const status = error.response?.status;
