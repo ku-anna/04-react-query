@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Toaster, toast } from "react-hot-toast";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
 import { Movie } from "../../types/movie";
 import { fetchMovies, TMDBResponse } from "../../services/movieService";
@@ -21,7 +21,7 @@ export default function App() {
     queryKey: ["movies", query, currentPage],
     queryFn: () => fetchMovies({ query, page: currentPage }),
     enabled: query !== "",
-    keepPreviousData: true,
+    placeholderData: keepPreviousData,
   });
 
   useEffect(() => {
