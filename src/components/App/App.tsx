@@ -10,7 +10,7 @@ import MovieGrid from "../MovieGrid/MovieGrid";
 import MovieModal from "../MovieModal/MovieModal";
 import Loader from "../Loader/Loader";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
-import ReactPaginate from "../ReactPaginate/ReactPaginate";
+import Pagination from "../ReactPaginate/ReactPaginate";
 
 export default function App() {
   const [query, setQuery] = useState("");
@@ -23,8 +23,6 @@ export default function App() {
     enabled: query !== "",
     placeholderData: keepPreviousData,
   });
-
-  console.log({ data, isLoading, isError });
 
   const handleSearch = (newQuery: string) => {
     setQuery(newQuery);
@@ -41,10 +39,9 @@ export default function App() {
 
   return (
     <>
-      <Toaster position="top-right" reverseOrder={false} />
-
       <SearchBar onSubmit={handleSearch} />
 
+      <Toaster position="top-right" reverseOrder={false} />
       {isLoading && <Loader />}
       {isError && <ErrorMessage />}
 
@@ -57,21 +54,14 @@ export default function App() {
           <MovieGrid movies={data.results} onSelect={handleSelect} />
 
           {data.total_pages > 1 && (
-            <ReactPaginate
-              totalPages={data.total_pages}
-              currentPage={currentPage}
-              onPageChange={(selectedPage: number) =>
-                setCurrentPage(selectedPage)
-              }
+            <Pagination
+              total={data.total_pages}
+              page={currentPage}
+              onChange={(nextPage) => setCurrentPage(nextPage)}
             />
           )}
         </>
       )}
-
-      {data?.results.length === 0 &&
-        !isLoading &&
-        !isError &&
-        toast.error("No movies found.")}
 
       {selectedMovie && (
         <MovieModal movie={selectedMovie} onClose={handleClose} />
