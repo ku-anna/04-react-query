@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Toaster, toast } from "react-hot-toast";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import { Movie } from "../../types/movie";
 import { fetchMovies, TMDBResponse } from "../../services/movieService";
@@ -21,8 +21,14 @@ export default function App() {
     queryKey: ["movies", query, currentPage],
     queryFn: () => fetchMovies({ query, page: currentPage }),
     enabled: query !== "",
-    placeholderData: keepPreviousData,
+    keepPreviousData: true,
   });
+
+  useEffect(() => {
+    if (query !== "" && !isLoading && !isError && data?.results.length === 0) {
+      toast.error("No movies found");
+    }
+  }, [query, isLoading, isError, data]);
 
   const handleSearch = (newQuery: string) => {
     setQuery(newQuery);
