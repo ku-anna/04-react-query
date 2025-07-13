@@ -17,7 +17,7 @@ export default function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
 
-  const { data, isLoading, isError } = useQuery<TMDBResponse>({
+  const { data, isLoading, isError, isSuccess } = useQuery<TMDBResponse>({
     queryKey: ["movies", query, currentPage],
     queryFn: () => fetchMovies({ query, page: currentPage }),
     enabled: query !== "",
@@ -25,10 +25,10 @@ export default function App() {
   });
 
   useEffect(() => {
-    if (query !== "" && !isLoading && !isError && data?.results.length === 0) {
+    if (query !== "" && isSuccess && data.results.length === 0) {
       toast.error("No movies found");
     }
-  }, [query, isLoading, isError, data]);
+  }, [query, isSuccess, data]);
 
   const handleSearch = (newQuery: string) => {
     setQuery(newQuery);
@@ -51,7 +51,7 @@ export default function App() {
       {isLoading && <Loader />}
       {isError && <ErrorMessage />}
 
-      {data?.results.length > 0 && (
+      {isSuccess && data.results.length > 0 && (
         <>
           <p style={{ padding: "8px 0" }}>
             Showing results for: <strong>{query}</strong>
@@ -61,9 +61,9 @@ export default function App() {
 
           {data.total_pages > 1 && (
             <Pagination
-              total={data.total_pages}
-              page={currentPage}
-              onChange={(nextPage) => setCurrentPage(nextPage)}
+              pageCount={data.total_pages}
+              forcePage={currentPage - 1}
+              onPageChange={({ selected }) => setCurrentPage(selected + 1)}
             />
           )}
         </>
